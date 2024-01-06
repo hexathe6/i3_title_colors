@@ -51,13 +51,13 @@ struct context {
  * border and text as every element in i3 has them (window decorations, bar).
  *
  */
-struct Colortriple {
+/*struct Colortriple {
     color_t border;
     color_t background;
     color_t text;
     color_t indicator;
     color_t child_border;
-};
+    };*/ // ingo, h6: patched out
 
 /**
  * Holds a user-assigned variable for parsing the configuration file. The key
@@ -235,7 +235,7 @@ struct Config {
     int32_t floating_minimum_height;
 
     /* Color codes are stored here */
-    struct config_client {
+  /*struct config_client {
         color_t background;
         struct Colortriple focused;
         struct Colortriple focused_inactive;
@@ -244,7 +244,8 @@ struct Config {
         struct Colortriple urgent;
         struct Colortriple placeholder;
         bool got_focused_tab_title;
-    } client;
+        } client;*/ // ingo, h6: patched out
+  client_colors client;
     struct config_bar {
         struct Colortriple focused;
         struct Colortriple unfocused;

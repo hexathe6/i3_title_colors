@@ -50,6 +50,10 @@ typedef struct Window i3Window;
 typedef struct gaps_t gaps_t;
 typedef struct mark_t mark_t;
 
+// i3tc
+typedef struct Colortriple Colortriple;
+typedef struct client_colors client_colors;
+
 /******************************************************************************
  * Helper types
  *****************************************************************************/
@@ -231,6 +235,34 @@ struct deco_render_params {
     layout_t parent_layout;
     bool con_is_leaf;
 };
+
+// i3tc
+/**
+ * It makes sense to group colors for background, border and text as every
+ * element in i3 has them (window decorations, bar).
+ *
+ */
+struct Colortriple {
+  color_t border; // this may have been renamed/removed since 4.10 - hexa6
+    color_t child_border;
+    color_t background;
+    color_t text;
+    color_t indicator;
+};
+
+struct client_colors {
+  bool got_focused_tab_title;
+    color_t background;
+    struct Colortriple focused;
+    struct Colortriple focused_inactive;
+    struct Colortriple focused_tab_title;
+    struct Colortriple unfocused;
+    struct Colortriple urgent;
+    struct Colortriple placeholder;
+};
+// end i3tc
+
+
 
 /**
  * Stores which workspace (by name or number) goes to which output and its gaps config.
@@ -806,6 +838,8 @@ struct Con {
 
     /* Depth of the container window */
     uint16_t depth;
+
+  client_colors colors; // i3tc
 
     /* The colormap for this con if a custom one is used. */
     xcb_colormap_t colormap;

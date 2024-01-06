@@ -450,6 +450,17 @@ static size_t x_get_border_rectangles(Con *con, xcb_rectangle_t rectangles[4]) {
     return count;
 }
 
+// i3tc [hexa6]
+int color_t_cmp(color_t* a, color_t* b)
+{
+  if(a->red == b->red
+     && a->green == b->green
+     && a->blue == b->blue
+     && a->alpha == b->alpha)
+    return 1;
+  return 0;
+}
+
 /*
  * Draws the decoration of the given container onto its parent.
  *
@@ -487,21 +498,41 @@ void x_draw_decoration(Con *con) {
     /* 1: build deco_params and compare with cache */
     struct deco_render_params *p = scalloc(1, sizeof(struct deco_render_params));
 
+    // i3tc
     /* find out which colors to use */
+    color_t nullcol = {0,0,0,0,0};
     if (con->urgent) {
-        p->color = &config.client.urgent;
+      //p->color = &config.client.urgent;
+      p->color = !color_t_cmp(&(con->colors.urgent.border), &nullcol) ? &(con->colors.urgent) : &config.client.urgent;
     } else if (con == focused || con_inside_focused(con)) {
-        p->color = &config.client.focused;
+      //p->color = &config.client.focused;
+      p->color = !color_t_cmp(&(con->colors.focused.border), &nullcol) ? &(con->colors.focused) : &config.client.focused;
     } else if (con == TAILQ_FIRST(&(parent->focus_head))) {
         if (config.client.got_focused_tab_title && !leaf && con_descend_focused(con) == focused) {
             /* Stacked/tabbed parent of focused container */
             p->color = &config.client.focused_tab_title;
         } else {
-            p->color = &config.client.focused_inactive;
+          //p->color = &config.client.focused_inactive;
+          p->color = !color_t_cmp(&(con->colors.focused_inactive.border), &nullcol) ? &(con->colors.focused_inactive) : &config.client.focused_inactive;
         }
     } else {
-        p->color = &config.client.unfocused;
+      //p->color = &config.client.unfocused;
+      p->color = !color_t_cmp(&(con->colors.unfocused.border), &nullcol) ? &(con->colors.unfocused) : &config.client.unfocused;
     }
+    if (con->urgent) {
+      p->color->child_border = !color_t_cmp(&(con->colors.urgent.border), &nullcol) ? (con->colors.urgent.border) : config.client.urgent.border;
+    } else if (con == focused || con_inside_focused(con)) {
+      p->color->child_border = !color_t_cmp(&(con->colors.focused.border), &nullcol) ? (con->colors.focused.border) : config.client.focused.border;
+    } else if (con == TAILQ_FIRST(&(parent->focus_head))) {
+        if (config.client.got_focused_tab_title && !leaf && con_descend_focused(con) == focused) {
+            p->color->child_border = config.client.focused_tab_title.border;
+        } else {
+          p->color->child_border = !color_t_cmp(&(con->colors.focused_inactive.border), &nullcol) ? (con->colors.focused_inactive.border) : config.client.focused_inactive.border;
+        }
+    } else {
+      p->color->child_border = !color_t_cmp(&(con->colors.unfocused.border), &nullcol) ? (con->colors.unfocused.border) : config.client.unfocused.border;
+    }
+    // i3tc end
 
     p->border_style = con_border_style(con);
 
@@ -510,6 +541,7 @@ void x_draw_decoration(Con *con) {
     p->con_rect = (struct width_height){r->width, r->height};
     p->con_window_rect = (struct width_height){w->width, w->height};
     p->con_deco_rect = con->deco_rect;
+    // i3tc: TODO needs to be taken care of as well, too lazy right now
     p->background = config.client.background;
     p->con_is_leaf = con_is_leaf(con);
     p->parent_layout = con->parent->layout;
@@ -566,7 +598,10 @@ void x_draw_decoration(Con *con) {
         xcb_rectangle_t rectangles[4];
         size_t rectangles_count = x_get_border_rectangles(con, rectangles);
         for (size_t i = 0; i < rectangles_count; i++) {
-            draw_util_rectangle(&(con->frame_buffer), p->color->child_border,
+          draw_util_rectangle(&(con->frame_buffer),
+                              /*p->color->child_border*/
+                              p->color->child_border
+                              /*!color_t_cmp(&(con->colors.focused.child_border), &nullcol) ? con->colors.focused.child_border : config.client.focused.child_border*/, // i3tc
                                 rectangles[i].x,
                                 rectangles[i].y,
                                 rectangles[i].width,

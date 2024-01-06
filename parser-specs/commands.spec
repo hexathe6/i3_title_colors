@@ -44,6 +44,9 @@ state INITIAL:
   'mode' -> MODE
   'bar' -> BAR
   'gaps' -> GAPS
+  # i3tc
+  colorclass = 'client.focused_inactive', 'client.focused', 'client.unfocused', 'client.urgent', 'client.placeholder'
+      -> COLOR_BORDER
 
 state CRITERIA:
   ctype = 'class'       -> CRITERION
@@ -406,6 +409,26 @@ state MOVE_DIRECTION:
       -> MOVE_DIRECTION_NUMBER
   end
       -> call cmd_move_direction($direction, 10, "px")
+
+
+# i3tc
+# <colorclass> <border> <background> <text> <indicator>
+state COLOR_BORDER:
+  border = word
+      -> COLOR_BACKGROUND
+
+state COLOR_BACKGROUND:
+  background = word
+      -> COLOR_TEXT
+
+state COLOR_TEXT:
+  text = word
+      -> COLOR_INDICATOR
+
+state COLOR_INDICATOR:
+  indicator = word
+      -> call cmd_color($colorclass, $border, $background, $text, $indicator)
+# i3tc end
 
 state MOVE_DIRECTION_NUMBER:
   mode = 'px', 'ppt'

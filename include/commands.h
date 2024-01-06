@@ -343,3 +343,9 @@ void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, con
  *
  */
 void cmd_title_window_icon(I3_CMD, const char *enable, int padding);
+
+/**
+ * Implementation of '<colorclass> <border> <background> <text> <indicator>
+ *
+ */
+void cmd_color(I3_CMD, char *colorclass, char *border, char *background, char *text, char *indicator);
